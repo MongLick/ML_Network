@@ -28,7 +28,9 @@ public class Chat : MonoBehaviour
             client.SendChat(chat);
         }
 
-        inputField.text = "";
+        AddMessage(chat);
+
+		inputField.text = "";
         inputField.ActivateInputField();
     }
 }
