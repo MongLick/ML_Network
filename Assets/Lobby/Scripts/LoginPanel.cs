@@ -1,17 +1,25 @@
+using Photon.Pun;
 using TMPro;
 using UnityEngine;
 
 public class LoginPanel : MonoBehaviour
 {
-    [SerializeField] TMP_InputField idInputField;
+	[SerializeField] TMP_InputField idInputField;
 
-    private void Start()
-    {
-        idInputField.text = $"Player {Random.Range(1000, 10000)}";
-    }
+	private void Start()
+	{
+		idInputField.text = $"Player {Random.Range(1000, 10000)}";
+	}
 
-    public void Login()
-    {
+	public void Login()
+	{
+		if(idInputField.text == "")
+		{
+			Debug.LogError("Empty nickname : Please input Name");
+			return;
+		}
 
-    }
+		PhotonNetwork.LocalPlayer.NickName = idInputField.text;
+		PhotonNetwork.ConnectUsingSettings();
+	}
 }
