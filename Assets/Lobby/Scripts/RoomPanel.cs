@@ -1,3 +1,4 @@
+using ExitGames.Client.Photon;
 using Photon.Pun;
 using Photon.Realtime;
 using System.Collections.Generic;
@@ -27,6 +28,10 @@ public class RoomPanel : MonoBehaviour
 		}
 
 		startButton.gameObject.SetActive(PhotonNetwork.IsMasterClient);
+		PhotonNetwork.LocalPlayer.SetReady(false);
+		PhotonNetwork.LocalPlayer.SetLoad(false);
+		AllPlayerReadyCheck();
+		PhotonNetwork.AutomaticallySyncScene = true;
 	}
 
 	private void OnDisable()
@@ -36,11 +41,12 @@ public class RoomPanel : MonoBehaviour
 			Destroy(playerContent.GetChild(i).gameObject);
 		}
 		playerList.Clear();
+		PhotonNetwork.AutomaticallySyncScene = false;
 	}
 
 	public void StartGame()
 	{
-
+		PhotonNetwork.LoadLevel("GameScene");
 	}
 
 	public void PlayerEnterRoom(Player newPlayer)
@@ -48,6 +54,8 @@ public class RoomPanel : MonoBehaviour
 		PlayerEntry playerEntry = Instantiate(playerEntryPrefab, playerContent);
 		playerEntry.SetPlayer(newPlayer);
 		playerList.Add(playerEntry);
+
+		AllPlayerReadyCheck();
 	}
 
 	public void PlayerLeftRoom(Player otherPlayer)
@@ -63,15 +71,51 @@ public class RoomPanel : MonoBehaviour
 
 		Destroy(playerEntry.gameObject);
 		playerList.Remove(playerEntry);
+
+		AllPlayerReadyCheck();
 	}
 
 	public void MasterClientSwirched(Player newMasterClient)
 	{
 		startButton.gameObject.SetActive(newMasterClient.IsLocal);
+
+		AllPlayerReadyCheck();
+	}
+
+	public void PlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
+	{
+		PlayerEntry playerEntry = null;
+		foreach (PlayerEntry entry in playerList)
+		{
+			if (entry.Player.ActorNumber == targetPlayer.ActorNumber)
+			{
+				playerEntry = entry;
+			}
+		}
+		playerEntry.ChangeCutomProperty(changedProps);
+		AllPlayerReadyCheck();
 	}
 
 	public void LeaveRoom()
 	{
 		PhotonNetwork.LeaveRoom();
+	}
+
+	public void AllPlayerReadyCheck()
+	{
+		if (!PhotonNetwork.IsMasterClient)
+		{
+			return;
+		}
+
+		int readyCount = 0;
+		foreach (Player player in PhotonNetwork.PlayerList)
+		{
+			if (player.GetReady())
+			{
+				readyCount++;
+			}
+		}
+		startButton.interactable = readyCount == PhotonNetwork.PlayerList.Length;
 	}
 }

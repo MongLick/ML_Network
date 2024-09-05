@@ -1,3 +1,4 @@
+using ExitGames.Client.Photon;
 using Photon.Pun;
 using Photon.Realtime;
 using System.Collections.Generic;
@@ -93,6 +94,11 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 	public override void OnMasterClientSwitched(Player newMasterClient)
 	{
 		roomPanel.MasterClientSwirched(newMasterClient);
+	}
+
+	public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
+	{
+		roomPanel.PlayerPropertiesUpdate(targetPlayer, changedProps);
 	}
 
 	private void Start()
